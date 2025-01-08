@@ -116,10 +116,8 @@ public class Depot {
 		htmlContent.append("<div>");  // Start of the container div for better HTML management
 		htmlContent.append("<h1>All Parcels:</h1>");
 
-		// Check if parcelMap is not empty
 		if (!parcelMap.getAllParcels().isEmpty()) {
 			for (Parcel parcel : parcelMap.getAllParcels().values()) {
-				// Append each parcel's details in HTML format
 				htmlContent.append("<p>");
 				htmlContent.append("Parcel ID: ").append(parcel.getParcelId()).append(", ");
 				htmlContent.append("Owner: ").append(parcel.getOwnerName()).append(", ");
@@ -131,11 +129,10 @@ public class Depot {
 				htmlContent.append("</p>");
 			}
 		} else {
-			// If no parcels are available
 			htmlContent.append("<p>No parcels currently stored.</p>");
 		}
 
-		htmlContent.append("</div>");  // End of the container div
+		htmlContent.append("</div>");
 		return htmlContent.toString();
     }
 
@@ -171,7 +168,6 @@ public class Depot {
 					writer.write(line);
 				}
 			} else {
-				// If no parcels are stored, write a notification
 				writer.write("No parcels currently stored.\n");
 			}
 
