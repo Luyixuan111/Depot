@@ -13,7 +13,6 @@ public class Interface {
 	private Depot depot;
 	private boolean isStaff;
 
-	// Default Constructor
 	public Interface() {
 		this.depot = new Depot();
 		customerQueue = new CustomerQueue();
@@ -28,7 +27,6 @@ public class Interface {
 			System.out.println("\nMenu");
 			System.out.println("--------------");
 
-			// Display menu based on role
 			if (isStaff) {
 				System.out.println("1. Add a product to the depot");
 				System.out.println("2. Update an existing product in the depot");
@@ -57,7 +55,6 @@ public class Interface {
 	}
 
 	private void addProductFromUrl(double weight, double length, double width, double height, int daysInDepot, String ownerName) {
-		// Add product to the depot
 		depot.addProduct(weight, length, width, height, daysInDepot, ownerName);
 		System.out.println("Product added successfully to the depot.");
 	}
@@ -78,11 +75,10 @@ public class Interface {
 		System.out.print("Owner's Name: ");
 		String ownerName = scannerObj.nextLine();
 
-		// Create a new Parcel instance with owner name
 		Parcel newParcel = new Parcel(weight, length, width, height, daysInDepot, ownerName);
 		depot.addProduct(weight, length, width, height, daysInDepot, ownerName);
 		System.out.println("Product added successfully to the depot.");
-		printDepotToFile(); // Update file after adding a product
+		printDepotToFile();
 	}
 
 	private void updateProduct(Scanner scannerObj) {
@@ -91,10 +87,9 @@ public class Interface {
 		System.out.print("New Days in Depot: ");
 		int daysInDepot = scannerObj.nextInt();
 
-		// Update product in the depot
 		depot.updateProduct(parcelId, daysInDepot);
 		System.out.println("Product updated successfully.");
-		printDepotToFile(); // Update file after updating a product
+		printDepotToFile();
 	}
 
 	private void markProductAsPickedUp(Scanner scannerObj) {
@@ -102,7 +97,7 @@ public class Interface {
 		String parcelId = scannerObj.next();
 		depot.markProductAsPickedUp(parcelId);
 		System.out.println("Product status updated to 'picked up'.");
-		printDepotToFile(); // Update file after marking product as picked up
+		printDepotToFile();
 	}
 
 
@@ -112,7 +107,7 @@ public class Interface {
 		String parcelId = scannerObj.next();
 		depot.removeProduct(parcelId);
 		System.out.println("Product removed from the depot successfully.");
-		printDepotToFile(); // Update file after removing a product
+		printDepotToFile();
 	}
 
 	private void displayProducts() {
@@ -135,7 +130,7 @@ public class Interface {
 	}
 
 	private void printDepotToFile() {
-		depot.printDepotToFile(); // Call the function from the Depot class
+		depot.printDepotToFile();
 	}
 
 
@@ -152,7 +147,6 @@ public class Interface {
 	public void run() {
 		Scanner scannerObj = new Scanner(System.in);
 
-		// Authenticate user
 		authenticateUser(scannerObj);
 
 		boolean keepRunning = true;
@@ -163,8 +157,8 @@ public class Interface {
 					addProduct(scannerObj);
 					break;
 				case 2:
-					if (isStaff) updateProduct(scannerObj); // Update product for staff
-					else markProductAsPickedUp(scannerObj); // Mark product as picked up for customer
+					if (isStaff) updateProduct(scannerObj);
+					else markProductAsPickedUp(scannerObj);
 					break;
 				case 3:
 					if (isStaff) markProductAsPickedUp(scannerObj);
@@ -296,7 +290,7 @@ public class Interface {
 				public void handle(HttpExchange t) throws IOException {
 					String response = "<html><head><title>Parcel List</title></head><body>";
 					response += "<h1>Parcel List</h1>";
-					response += depot.displayProductsForUrl();  // This method should return a formatted string of parcel data
+					response += depot.displayProductsForUrl();
 					response += "<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Back to Manager Menu</button>";
 					response += "</body></html>";
 
@@ -311,7 +305,7 @@ public class Interface {
 				public void handle(HttpExchange t) throws IOException {
 					String response = "<html><head><title>Customer Queue</title></head><body>";
 					response += "<h1>Customer Queue</h1>";
-					response += customerQueue.displayQueue();  // Assumes a method that returns formatted customer queue data
+					response += customerQueue.displayQueue();
 					response += "<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Back to Manager Menu</button>";
 					response += "</body></html>";
 
@@ -324,7 +318,7 @@ public class Interface {
 
 			server.createContext("/calculate_fees", new HttpHandler() {
 				public void handle(HttpExchange t) throws IOException {
-					double totalFees = depot.calculateCumulativeValue();  // Method to calculate total fees
+					double totalFees = depot.calculateCumulativeValue();
 					String response = "<html><head><title>Calculate Fees</title></head><body>";
 					response += "<h1>Total Fees Calculated</h1>";
 					response += "<p>Total Fees: $" + totalFees + "</p>";
@@ -346,7 +340,7 @@ public class Interface {
 				public void handle(HttpExchange t) throws IOException {
 					String response = "<html><head><title>Product List</title></head><body>";
 					response += "<h1>Product List</h1>";
-					response += depot.displayProductsForUrl(); // Assuming depot.displayProducts() now returns an HTML string
+					response += depot.displayProductsForUrl();
 					response += "<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/staff';\">Back to Main</button>";
 					response += "</body></html>";
 
@@ -385,7 +379,7 @@ public class Interface {
 						Map<String, String> formData = parseFormData(query);
 						String fullName = formData.get("fullName");
 
-						synchronized (customerQueue) { // Ensure thread safety
+						synchronized (customerQueue) {
 							if (!customerQueue.contains(fullName)) {
 								customerQueue.enqueue(new Customer(fullName));
 								Log.getInstance().addEvent("Customer added to queue: " + fullName);
@@ -440,8 +434,6 @@ public class Interface {
 				}
 			});
 
-
-			// Context for adding a product form
 			server.createContext("/add_product", (HttpExchange t) -> {
 				String formHtml = "<html>" +
 						"<head><title>Add Product</title></head>" +
@@ -465,7 +457,6 @@ public class Interface {
 				os.close();
 			});
 
-			// Context for adding a product form
 			server.createContext("/cus_add_product", (HttpExchange t) -> {
 				String formHtml = "<html>" +
 						"<head><title>Add Product</title></head>" +
@@ -514,7 +505,7 @@ public class Interface {
 							os.close();
 						}
 					} catch (Exception e) {
-						e.printStackTrace(); // Log to standard error or your log file
+						e.printStackTrace();
 						try {
 							t.sendResponseHeaders(500, 0);
 							OutputStream os = t.getResponseBody();
@@ -561,7 +552,7 @@ public class Interface {
 					if ("POST".equals(t.getRequestMethod())) {
 						InputStreamReader isr = new InputStreamReader(t.getRequestBody(), "utf-8");
 						BufferedReader br = new BufferedReader(isr);
-						String query = br.readLine();  // Read the request body containing the form data
+						String query = br.readLine();
 						Map<String, String> formData = parseFormData(query);
 
 						String parcelId = formData.get("parcelId");
@@ -571,10 +562,8 @@ public class Interface {
 						double height = Double.parseDouble(formData.get("height"));
 						int daysInDepot = Integer.parseInt(formData.get("daysInDepot"));
 
-						// Call the updateProduct method
 						depot.updateProductFromUrl(parcelId, weight, length, width, height, daysInDepot);
 
-						// Response HTML with embedded JavaScript for the popup
 						String response = "<html><head><script type='text/javascript'>alert('Product updated successfully!'); window.history.go(-1);</script></head><body></body></html>";
 						t.sendResponseHeaders(200, response.getBytes().length);
 						OutputStream os = t.getResponseBody();
@@ -640,17 +629,15 @@ public class Interface {
 					if ("POST".equals(t.getRequestMethod())) {
 						InputStreamReader isr = new InputStreamReader(t.getRequestBody(), "utf-8");
 						BufferedReader br = new BufferedReader(isr);
-						String query = br.readLine(); // Read the request body containing the form data
+						String query = br.readLine();
 						Map<String, String> formData = parseFormData(query);
 
 						String parcelId = formData.get("parcelId");
 
-						// Call the markProductAsPickedUp method
 						depot.markProductAsPickedUpFromUrl(parcelId);
 
-						// Redirect back to /staff after marking the product as picked up
 						t.getResponseHeaders().set("Location", "/staff");
-						t.sendResponseHeaders(303, -1); // 303 See Other
+						t.sendResponseHeaders(303, -1);
 						t.close();
 					} else {
 						String response = "Invalid request method!";
@@ -689,17 +676,15 @@ public class Interface {
 					if ("POST".equals(t.getRequestMethod())) {
 						InputStreamReader isr = new InputStreamReader(t.getRequestBody(), "utf-8");
 						BufferedReader br = new BufferedReader(isr);
-						String query = br.readLine(); // Read the request body containing the form data
+						String query = br.readLine();
 						Map<String, String> formData = parseFormData(query);
 
 						String parcelId = formData.get("parcelId");
 
-						// Call the removeProduct method
 						depot.removeProduct(parcelId);
 
-						// Redirect back to /staff after removing the product
 						t.getResponseHeaders().set("Location", "/staff");
-						t.sendResponseHeaders(303, -1); // 303 See Other
+						t.sendResponseHeaders(303, -1);
 						t.close();
 					} else {
 						String response = "Invalid request method!";
@@ -739,7 +724,7 @@ public class Interface {
 					if ("POST".equals(t.getRequestMethod())) {
 						InputStreamReader isr = new InputStreamReader(t.getRequestBody(), "utf-8");
 						BufferedReader br = new BufferedReader(isr);
-						String query = br.readLine(); // Read the request body containing the form data
+						String query = br.readLine();
 						Map<String, String> formData = parseFormData(query);
 
 						String parcelId = formData.get("parcelId");
@@ -806,7 +791,7 @@ public class Interface {
 				public void handle(HttpExchange t) throws IOException {
 					if ("GET".equals(t.getRequestMethod())) {
 						try {
-							depot.printDepotToFile(); // This calls the method that writes to a file
+							depot.printDepotToFile();
 							String response = "<html><head><title>Export Successful</title></head><body>" +
 									"<h1>Export Successful</h1>" +
 									"<p>The depot details have been successfully exported to 'DepotDetails.txt'.</p>" +
@@ -868,7 +853,7 @@ public class Interface {
 		Interface intFace = new Interface();
 		intFace.startHttpServer();
 
-		intFace.run();
+//		intFace.run();
 	}
 
 }
