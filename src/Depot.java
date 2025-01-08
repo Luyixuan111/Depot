@@ -4,6 +4,7 @@ import java.io.IOException;
 
 public class Depot {
 	private Connection connection;
+	private ParcelMap parcelMap;
 
 	public Depot() {
 		try {
@@ -13,6 +14,8 @@ public class Depot {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+
+		parcelMap = new ParcelMap();
 	}
 
 	private void initializeDatabase() throws SQLException {
@@ -36,48 +39,24 @@ public class Depot {
 	}
 
 	public void addProduct(double weight, double length, double width, double height, int daysInDepot, String ownerName) {
-		String sql = """
-        INSERT INTO Products (parcelId, weight, length, width, height, daysInDepot, ownerName, dimensions, status, collectionFee)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in depot', ?);
-        """;
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			String parcelId = Parcel.generateParcelId();
-			String dimensions = length + "x" + width + "x" + height;
-			double collectionFee = (weight * 0.5) + (daysInDepot * 0.2);
+		Parcel newParcel = new Parcel(weight, length, width, height, daysInDepot, ownerName);
 
-			pstmt.setString(1, parcelId);
-			pstmt.setDouble(2, weight);
-			pstmt.setDouble(3, length);
-			pstmt.setDouble(4, width);
-			pstmt.setDouble(5, height);
-			pstmt.setInt(6, daysInDepot);
-			pstmt.setString(7, ownerName);
-			pstmt.setString(8, dimensions);
-			pstmt.setDouble(9, collectionFee);
+		// Add the new Parcel to the ParcelMap
+		parcelMap.addParcel(newParcel);
 
-			pstmt.executeUpdate();
-			System.out.printf("Product added with Parcel ID: %s\n", parcelId);
-			Log.getInstance().addEvent("Product added: " + parcelId);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		// Logging the addition of the new Parcel
+		System.out.printf("Parcel added with Parcel ID: %s\n", newParcel.getParcelId());
+		Log.getInstance().addEvent("Parcel added: " + newParcel.getParcelId());
 	}
 
 
 	public void removeProduct(String parcelId) {
-		String sql = "DELETE FROM Products WHERE parcelId = ?";
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			pstmt.setString(1, parcelId);
-
-			int rowsDeleted = pstmt.executeUpdate();
-			if (rowsDeleted > 0) {
-				System.out.printf("Product with Parcel ID %s has been removed successfully.\n", parcelId);
-				Log.getInstance().addEvent("Product removed: " + parcelId);
-			} else {
-				System.out.printf("Product with Parcel ID %s was not found in the database.\n", parcelId);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		if (parcelMap.containsParcel(parcelId)) {
+			parcelMap.removeParcel(parcelId);
+			System.out.printf("Parcel with Parcel ID %s has been removed successfully.\n", parcelId);
+			Log.getInstance().addEvent("Parcel removed: " + parcelId);
+		} else {
+			System.out.printf("Parcel with Parcel ID %s was not found.\n", parcelId);
 		}
 	}
 
@@ -99,31 +78,18 @@ public class Depot {
 
 
 	public void updateProductFromUrl(String parcelId, double weight, double length, double width, double height, int daysInDepot) {
-		String sql = "UPDATE Products SET weight = ?, length = ?, width = ?, height = ?, dimensions = ?, daysInDepot = ?, collectionFee = ?, status = 'in depot' WHERE parcelId = ?";
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			double newCollectionFee = (daysInDepot * 0.2);
-			String newDimensions = length + "x" + width + "x" + height;
-
-			pstmt.setDouble(1, weight);
-			pstmt.setDouble(2, length);
-			pstmt.setDouble(3, width);
-			pstmt.setDouble(4, height);
-			pstmt.setString(5, newDimensions);
-			pstmt.setInt(6, daysInDepot);
-//			pstmt.setString(7, ownerName);
-
-			pstmt.setDouble(8, newCollectionFee);
-			pstmt.setString(9, parcelId);
-
-			int rowsUpdated = pstmt.executeUpdate();
-			if (rowsUpdated > 0) {
-				System.out.printf("Product with Parcel ID %s updated successfully.\n", parcelId);
-				Log.getInstance().addEvent("Product Updated: " + parcelId);
-			} else {
-				System.out.printf("Product with Parcel ID %s not found.\n", parcelId);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		Parcel parcel = parcelMap.getParcel(parcelId);
+		if (parcel != null) {
+			parcel.setWeight(weight);
+			parcel.setLength(length);
+			parcel.setWidth(width);
+			parcel.setHeight(height);
+			parcel.setDaysInDepot(daysInDepot);
+			parcel.updateCollectionFee();
+			System.out.printf("Parcel with Parcel ID %s updated successfully.\n", parcelId);
+			Log.getInstance().addEvent("Parcel Updated: " + parcelId);
+		} else {
+			System.out.printf("Parcel with Parcel ID %s not found.\n", parcelId);
 		}
 	}
 
@@ -149,19 +115,13 @@ public class Depot {
 	}
 
 	public void markProductAsPickedUp(String parcelId) {
-		String sql = "UPDATE Products SET status = 'picked up' WHERE parcelId = ?";
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			pstmt.setString(1, parcelId);
-
-			int rowsUpdated = pstmt.executeUpdate();
-			if (rowsUpdated > 0) {
-				System.out.printf("Product with Parcel ID %s marked as picked up.\n", parcelId);
-				Log.getInstance().addEvent("Product picked up : " + parcelId);
-			} else {
-				System.out.printf("Product with Parcel ID %s not found.\n", parcelId);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		Parcel parcel = parcelMap.getParcel(parcelId);
+		if (parcel != null) {
+			parcel.setStatus("picked up");
+			System.out.printf("Parcel with Parcel ID %s marked as picked up.\n", parcelId);
+			Log.getInstance().addEvent("Parcel picked up: " + parcelId);
+		} else {
+			System.out.printf("Parcel with Parcel ID %s not found.\n", parcelId);
 		}
 	}
 
@@ -183,17 +143,9 @@ public class Depot {
 
 
 	public void displayProducts() {
-		String sql = "SELECT * FROM Products";
-		try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-			while (rs.next()) {
-				System.out.printf(
-						"Parcel ID: %s, Weight: %.2fkg, Dimensions: %s, Days in Depot: %d, Collection Fee: $%.2f, Status: %s, OwnerName: %s\n",
-						rs.getString("parcelId"), rs.getDouble("weight"), rs.getString("dimensions"),
-						rs.getInt("daysInDepot"), rs.getDouble("collectionFee"), rs.getString("status"), rs.getString("ownerName")
-				);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
+		System.out.println("All Parcels:");
+		for (Parcel parcel : parcelMap.getAllParcels().values()) {
+			System.out.println(parcel);
 		}
 	}
 
@@ -212,44 +164,47 @@ public class Depot {
 	}
 
 	public boolean isProductPresentFromUrl(String parcelId) {
-		String sql = "SELECT 1 FROM Products WHERE parcelId = ?, status = 'in depot'";
-		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			pstmt.setString(1, parcelId);
-			try (ResultSet rs = pstmt.executeQuery()) {
-				return rs.next();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return false;
-		}
+		return parcelMap.containsParcel(parcelId);
 	}
 
 
 	public String displayProductsForUrl() {
 		StringBuilder htmlContent = new StringBuilder();
-		String sql = "SELECT * FROM Products";
-		try (Statement stmt = this.connection.createStatement();
-			 ResultSet rs = stmt.executeQuery(sql)) {
-			while (rs.next()) {
-				htmlContent.append(String.format("<p>Parcel ID: %s, Weight: %.2fkg, Dimensions: %s, Days in Depot: %d, Collection Fee: $%.2f, Status: %s, OwnerName: %s </p>",
-						rs.getString("parcelId"), rs.getDouble("weight"), rs.getString("dimensions"), rs.getInt("daysInDepot"), rs.getDouble("collectionFee"), rs.getString("status"), rs.getString("ownerName")));
+		htmlContent.append("<div>");  // Start of the container div for better HTML management
+		htmlContent.append("<h1>All Parcels:</h1>");
+
+		// Check if parcelMap is not empty
+		if (!parcelMap.getAllParcels().isEmpty()) {
+			for (Parcel parcel : parcelMap.getAllParcels().values()) {
+				// Append each parcel's details in HTML format
+				htmlContent.append("<p>");
+				htmlContent.append("Parcel ID: ").append(parcel.getParcelId()).append(", ");
+				htmlContent.append("Owner: ").append(parcel.getOwnerName()).append(", ");
+				htmlContent.append("Weight: ").append(parcel.getWeight()).append("kg, ");
+				htmlContent.append("Dimensions: ").append(parcel.getDimensions()).append(", ");
+				htmlContent.append("Days in Depot: ").append(parcel.getDaysInDepot()).append(", ");
+				htmlContent.append("Status: ").append(parcel.getStatus()).append(", ");
+				htmlContent.append("Collection Fee: $").append(String.format("%.2f", parcel.getCollectionFee()));
+				htmlContent.append("</p>");
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			htmlContent.append("<p>Error accessing database.</p>");
+		} else {
+			// If no parcels are available
+			htmlContent.append("<p>No parcels currently stored.</p>");
 		}
+
+		htmlContent.append("</div>");  // End of the container div
 		return htmlContent.toString();
-	}
+    }
 
 
 	public double calculateCumulativeValue() {
-		String sql = "SELECT SUM(collectionFee) AS total FROM Products WHERE status = 'in depot'";
-		try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
-			return rs.getDouble("total");
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return 0.0;
+		double totalFees = 0.0;
+		for (Parcel parcel : parcelMap.getAllParcels().values()) {
+			if ("in depot".equals(parcel.getStatus())) {
+				totalFees += parcel.getCollectionFee();
+			}
 		}
+		return totalFees;
 	}
 
 	public void displayCumulativeValue() {

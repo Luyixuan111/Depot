@@ -136,7 +136,7 @@ public class Parcel {
 		return (weight * 0.5) + (daysInDepot * 0.2);
 	}
 
-	private void updateCollectionFee() {
+	public void updateCollectionFee() {
 		this.collectionFee = calculateCollectionFee();
 	}
 
