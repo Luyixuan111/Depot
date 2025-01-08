@@ -81,48 +81,8 @@ public class Interface {
 		printDepotToFile();
 	}
 
-	private void updateProduct(Scanner scannerObj) {
-		System.out.print("\nParcel ID: ");
-		String parcelId = scannerObj.next();
-		System.out.print("New Days in Depot: ");
-		int daysInDepot = scannerObj.nextInt();
-
-		depot.updateProduct(parcelId, daysInDepot);
-		System.out.println("Product updated successfully.");
-		printDepotToFile();
-	}
-
-	private void markProductAsPickedUp(Scanner scannerObj) {
-		System.out.print("\nParcel ID: ");
-		String parcelId = scannerObj.next();
-		depot.markProductAsPickedUp(parcelId);
-		System.out.println("Product status updated to 'picked up'.");
-		printDepotToFile();
-	}
 
 
-
-	private void removeProduct(Scanner scannerObj) {
-		System.out.print("\nParcel ID: ");
-		String parcelId = scannerObj.next();
-		depot.removeProduct(parcelId);
-		System.out.println("Product removed from the depot successfully.");
-		printDepotToFile();
-	}
-
-	private void displayProducts() {
-		depot.displayProducts();
-	}
-
-	private void checkProductExistence(Scanner scannerObj) {
-		System.out.print("\nParcel ID: ");
-		String parcelId = scannerObj.next();
-		if (depot.isProductPresent(parcelId)) {
-			System.out.printf("Product with Parcel ID %s exists in the depot.\n", parcelId);
-		} else {
-			System.out.printf("Product with Parcel ID %s does not exist in the depot.\n", parcelId);
-		}
-	}
 
 	private void cumulativeValueOfDepot() {
 		double totalValue = depot.calculateCumulativeValue();
@@ -144,49 +104,6 @@ public class Interface {
 		}
 	}
 
-	public void run() {
-		Scanner scannerObj = new Scanner(System.in);
-
-		authenticateUser(scannerObj);
-
-		boolean keepRunning = true;
-		while (keepRunning) {
-			int choice = printMenuAndGetChoice(scannerObj);
-			switch (choice) {
-				case 1:
-					addProduct(scannerObj);
-					break;
-				case 2:
-					if (isStaff) updateProduct(scannerObj);
-					else markProductAsPickedUp(scannerObj);
-					break;
-				case 3:
-					if (isStaff) markProductAsPickedUp(scannerObj);
-					break;
-				case 4:
-					if (isStaff) removeProduct(scannerObj);
-					break;
-				case 5:
-					if (isStaff) displayProducts();
-					break;
-				case 6:
-					if (isStaff) checkProductExistence(scannerObj);
-					break;
-				case 7:
-					if (isStaff) cumulativeValueOfDepot();
-					break;
-				case 8:
-					if (isStaff) printDepotToFile();
-					break;
-				case 0:
-					keepRunning = false;
-					break;
-				default:
-					System.out.println("Invalid choice.");
-			}
-		}
-		scannerObj.close();
-	}
 	private static Map<String, String> parseFormData(String formData) throws UnsupportedEncodingException {
 		Map<String, String> map = new HashMap<>();
 		String[] pairs = formData.split("&");
@@ -422,7 +339,7 @@ public class Interface {
 								"<h1>Enter your full name to access the Customer Menu</h1>" +
 								"<form action='/add_customer_to_queue' method='post'>" +
 								"Full Name: <input type='text' name='fullName'><br>" +
-								"<input type='submit' value='Submit'>" +
+								"<input style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' type='submit' value='Submit'>" +
 								"</form>" +
 								"</body>" +
 								"</html>";
