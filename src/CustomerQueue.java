@@ -55,7 +55,6 @@ public class CustomerQueue {
         return found;
     }
 
-    // Checks if a customer with the given full name is already in the queue
     public boolean contains(String fullName) {
         for (Customer customer : queue) {
             if (customer.getFullName().equals(fullName)) {

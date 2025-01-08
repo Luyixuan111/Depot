@@ -5,10 +5,8 @@ import java.io.IOException;
 public class Depot {
 	private Connection connection;
 
-	// Constructor to establish SQLite connection and initialize the database
 	public Depot() {
 		try {
-			// Connect to the SQLite database
 			connection = DriverManager.getConnection("jdbc:sqlite:depot.db");
 			initializeDatabase();
 			System.out.println("Connected to the SQLite database.");
@@ -17,7 +15,6 @@ public class Depot {
 		}
 	}
 
-	// Method to create the Products table if it doesn't exist
 	private void initializeDatabase() throws SQLException {
 		String createTableQuery = """
                 CREATE TABLE IF NOT EXISTS Products (
@@ -44,7 +41,7 @@ public class Depot {
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in depot', ?);
         """;
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			String parcelId = Parcel.generateParcelId(); // Generate unique Parcel ID
+			String parcelId = Parcel.generateParcelId();
 			String dimensions = length + "x" + width + "x" + height;
 			double collectionFee = (weight * 0.5) + (daysInDepot * 0.2);
 
@@ -54,7 +51,7 @@ public class Depot {
 			pstmt.setDouble(4, width);
 			pstmt.setDouble(5, height);
 			pstmt.setInt(6, daysInDepot);
-			pstmt.setString(7, ownerName);  // Correct position according to SQL
+			pstmt.setString(7, ownerName);
 			pstmt.setString(8, dimensions);
 			pstmt.setDouble(9, collectionFee);
 
@@ -67,7 +64,6 @@ public class Depot {
 	}
 
 
-	// Remove a product from the database by parcelId
 	public void removeProduct(String parcelId) {
 		String sql = "DELETE FROM Products WHERE parcelId = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -105,14 +101,14 @@ public class Depot {
 	public void updateProductFromUrl(String parcelId, double weight, double length, double width, double height, int daysInDepot) {
 		String sql = "UPDATE Products SET weight = ?, length = ?, width = ?, height = ?, dimensions = ?, daysInDepot = ?, collectionFee = ?, status = 'in depot' WHERE parcelId = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			double newCollectionFee = (daysInDepot * 0.2);  // Adjust fee logic if needed
-			String newDimensions = length + "x" + width + "x" + height;  // Recalculate the dimensions
+			double newCollectionFee = (daysInDepot * 0.2);
+			String newDimensions = length + "x" + width + "x" + height;
 
 			pstmt.setDouble(1, weight);
 			pstmt.setDouble(2, length);
 			pstmt.setDouble(3, width);
 			pstmt.setDouble(4, height);
-			pstmt.setString(5, newDimensions);  // Set the new dimensions string
+			pstmt.setString(5, newDimensions);
 			pstmt.setInt(6, daysInDepot);
 //			pstmt.setString(7, ownerName);
 
@@ -133,12 +129,10 @@ public class Depot {
 
 
 
-
-	// Update an existing product in the database
 	public void updateProduct(String parcelId, int daysInDepot) {
 		String sql = "UPDATE Products SET daysInDepot = ?, collectionFee = ?, status = 'in depot' WHERE parcelId = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-			double newCollectionFee = (daysInDepot * 0.2); // Adjust fee logic if needed
+			double newCollectionFee = (daysInDepot * 0.2);
 			pstmt.setInt(1, daysInDepot);
 			pstmt.setDouble(2, newCollectionFee);
 			pstmt.setString(3, parcelId);
@@ -154,7 +148,6 @@ public class Depot {
 		}
 	}
 
-	// Mark a product as picked up
 	public void markProductAsPickedUp(String parcelId) {
 		String sql = "UPDATE Products SET status = 'picked up' WHERE parcelId = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -189,7 +182,6 @@ public class Depot {
 	}
 
 
-	// Display all products in the database
 	public void displayProducts() {
 		String sql = "SELECT * FROM Products";
 		try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
@@ -205,14 +197,13 @@ public class Depot {
 		}
 	}
 
-	// Check if a product exists in the database
 	public boolean isProductPresent(String parcelId) {
 		String sql = "SELECT 1 FROM Products WHERE parcelId = ?";
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, parcelId);
 
 			try (ResultSet rs = pstmt.executeQuery()) {
-				return rs.next(); // Returns true if the product exists
+				return rs.next();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -225,7 +216,7 @@ public class Depot {
 		try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
 			pstmt.setString(1, parcelId);
 			try (ResultSet rs = pstmt.executeQuery()) {
-				return rs.next();  // Returns true if the product exists
+				return rs.next();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -251,7 +242,6 @@ public class Depot {
 	}
 
 
-	// Calculate the cumulative value of all products
 	public double calculateCumulativeValue() {
 		String sql = "SELECT SUM(collectionFee) AS total FROM Products WHERE status = 'in depot'";
 		try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
@@ -262,13 +252,11 @@ public class Depot {
 		}
 	}
 
-	// Display the cumulative value of all products
 	public void displayCumulativeValue() {
 		double totalValue = calculateCumulativeValue();
 		System.out.printf("Total collection fees for all products in depot: $%.2f\n", totalValue);
 	}
 
-	// Export depot data to a text file
 	public void printDepotToFile() {
 		String sql = "SELECT * FROM Products";
 		try (FileWriter writer = new FileWriter("DepotDetails.txt");
