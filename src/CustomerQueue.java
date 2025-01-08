@@ -13,6 +13,18 @@ public class CustomerQueue {
         queue.add(customer);
     }
 
+    public String displayQueue() {
+        StringBuilder htmlOutput = new StringBuilder("<ul>");
+        for (Customer customer : queue) {
+            htmlOutput.append("<li>").append(customer.getFullName()).append("</li>");
+        }
+        htmlOutput.append("</ul>");
+        if (queue.isEmpty()) {
+            return "<p>No customers in the queue.</p>";
+        }
+        return htmlOutput.toString();
+    }
+
     public Customer dequeue() {
         return queue.poll();
     }

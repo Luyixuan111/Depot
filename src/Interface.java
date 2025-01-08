@@ -214,6 +214,7 @@ public class Interface {
 							"<h1>Welcome to the Depot System</h1>" +
 							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/customer';\">Customers</button>" +
 							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/staff';\">Staff</button>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Manager</button>" +
 							"</body>" +
 							"</html>";
 					t.sendResponseHeaders(200, htmlResponse.getBytes().length);
@@ -222,6 +223,75 @@ public class Interface {
 					os.close();
 				}
 			});
+
+			server.createContext("/manager", new HttpHandler() {
+				public void handle(HttpExchange t) throws IOException {
+					String htmlResponse = "<html>" +
+							"<head><title>Manager Menu</title></head>" +
+							"<body>" +
+							"<h1>Manager Menu</h1>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/calculate_fees';\">Calculate Fees</button>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/customer_queue';\">Customer Queue</button>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/display_parcels';\">Display Parcels</button>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/depot';\">Go Back</button>" +
+							"</body>" +
+							"</html>";
+					t.sendResponseHeaders(200, htmlResponse.getBytes().length);
+					OutputStream os = t.getResponseBody();
+					os.write(htmlResponse.getBytes());
+					os.close();
+				}
+			});
+
+			server.createContext("/display_parcels", new HttpHandler() {
+				public void handle(HttpExchange t) throws IOException {
+					String response = "<html><head><title>Parcel List</title></head><body>";
+					response += "<h1>Parcel List</h1>";
+					response += depot.displayProductsForUrl();  // This method should return a formatted string of parcel data
+					response += "<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Back to Manager Menu</button>";
+					response += "</body></html>";
+
+					t.sendResponseHeaders(200, response.getBytes().length);
+					OutputStream os = t.getResponseBody();
+					os.write(response.getBytes());
+					os.close();
+				}
+			});
+
+			server.createContext("/customer_queue", new HttpHandler() {
+				public void handle(HttpExchange t) throws IOException {
+					String response = "<html><head><title>Customer Queue</title></head><body>";
+					response += "<h1>Customer Queue</h1>";
+					response += customerQueue.displayQueue();  // Assumes a method that returns formatted customer queue data
+					response += "<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Back to Manager Menu</button>";
+					response += "</body></html>";
+
+					t.sendResponseHeaders(200, response.getBytes().length);
+					OutputStream os = t.getResponseBody();
+					os.write(response.getBytes());
+					os.close();
+				}
+			});
+
+			server.createContext("/calculate_fees", new HttpHandler() {
+				public void handle(HttpExchange t) throws IOException {
+					double totalFees = depot.calculateCumulativeValue();  // Method to calculate total fees
+					String response = "<html><head><title>Calculate Fees</title></head><body>";
+					response += "<h1>Total Fees Calculated</h1>";
+					response += "<p>Total Fees: $" + totalFees + "</p>";
+					response += "<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Back to Manager Menu</button>";
+					response += "</body></html>";
+
+					t.sendResponseHeaders(200, response.getBytes().length);
+					OutputStream os = t.getResponseBody();
+					os.write(response.getBytes());
+					os.close();
+				}
+			});
+
+
+
+
 
 			server.createContext("/display_product", new HttpHandler() {
 				public void handle(HttpExchange t) throws IOException {
