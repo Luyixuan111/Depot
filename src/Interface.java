@@ -233,6 +233,7 @@ public class Interface {
 							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/calculate_fees';\">Calculate Fees</button>" +
 							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/customer_queue';\">Customer Queue</button>" +
 							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/display_parcels';\">Display Parcels</button>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/delete_customer_form';\">Delete Customer</button>" +
 							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/depot';\">Go Back</button>" +
 							"</body>" +
 							"</html>";
@@ -242,6 +243,54 @@ public class Interface {
 					os.close();
 				}
 			});
+
+			server.createContext("/delete_customer_form", new HttpHandler() {
+				public void handle(HttpExchange t) throws IOException {
+					String formHtml = "<html><head><title>Delete Customer</title></head><body>" +
+							"<h1>Delete a Customer from Queue</h1>" +
+							"<form action='/delete_customer' method='post'>" +
+							"Customer Name: <input type='text' name='fullName'><br>" +
+							"<input style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' type='submit' value='Delete Customer'>" +
+							"</form>" +
+							"<button style='background-color: black; color: white; font-size: 20px; padding: 10px 20px;' onclick=\"window.location.href='/manager';\">Back to Manager</button>" +
+							"</body></html>";
+					t.sendResponseHeaders(200, formHtml.getBytes().length);
+					OutputStream os = t.getResponseBody();
+					os.write(formHtml.getBytes());
+					os.close();
+				}
+			});
+
+			server.createContext("/delete_customer", new HttpHandler() {
+				public void handle(HttpExchange t) throws IOException {
+					if ("POST".equals(t.getRequestMethod())) {
+						InputStreamReader isr = new InputStreamReader(t.getRequestBody(), "utf-8");
+						BufferedReader br = new BufferedReader(isr);
+						String query = br.readLine();
+						Map<String, String> formData = parseFormData(query);
+						String fullName = formData.get("fullName");
+
+						synchronized (customerQueue) {
+							if (customerQueue.contains(fullName)) {
+								customerQueue.remove(fullName);
+								Log.getInstance().addEvent("Customer removed from queue: " + fullName);
+								String response = "<html><head><script>alert('Customer removed successfully.');window.location='/manager';</script></head><body></body></html>";
+								t.sendResponseHeaders(200, response.getBytes().length);
+								OutputStream os = t.getResponseBody();
+								os.write(response.getBytes());
+							} else {
+								String response = "<html><head><script>alert('Customer not found.');window.location='/delete_customer_form';</script></head><body></body></html>";
+								t.sendResponseHeaders(200, response.getBytes().length);
+								OutputStream os = t.getResponseBody();
+								os.write(response.getBytes());
+							}
+						}
+						t.close();
+					}
+				}
+			});
+
+
 
 			server.createContext("/display_parcels", new HttpHandler() {
 				public void handle(HttpExchange t) throws IOException {

@@ -41,6 +41,20 @@ public class CustomerQueue {
         return queue.size();
     }
 
+    public boolean remove(String fullName) {
+        boolean found = false;
+        Iterator<Customer> iterator = queue.iterator();
+        while (iterator.hasNext()) {
+            Customer customer = iterator.next();
+            if (customer.getFullName().equals(fullName)) {
+                iterator.remove();
+                found = true;
+                break;
+            }
+        }
+        return found;
+    }
+
     // Checks if a customer with the given full name is already in the queue
     public boolean contains(String fullName) {
         for (Customer customer : queue) {
