@@ -1,0 +1,7 @@
+Depot Products:
+------------------------------------------------------------
+Parcel ID: PF2998, Weight: 20.00kg, Dimensions: 30.0x40.0x50.0, Days in Depot: 60, Collection Fee: $22.00, Status: in depot
+Parcel ID: PB4382, Weight: 1.00kg, Dimensions: 1.0x1.0x1.0, Days in Depot: 1, Collection Fee: $0.70, Status: picked up
+Parcel ID: PM7018, Weight: 5.00kg, Dimensions: 3.0x2.0x1.0, Days in Depot: 7, Collection Fee: $1.40, Status: picked up
+Parcel ID: PE4961, Weight: 23.00kg, Dimensions: 100.0x230.0x430.0, Days in Depot: 12, Collection Fee: $13.90, Status: picked up
+------------------------------------------------------------
